@@ -31,48 +31,72 @@ export default function Dashboard() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data: sessionData } = await supabase.auth.getSession();
-      if (!sessionData.session) {
+      const { data: sessionData, error: sessionError } =
+        await supabase.auth.getSession();
+      if (sessionError || !sessionData.session) {
         router.push("/");
         return;
       }
 
-      const { data: user } = await supabase.auth.getUser();
-      const { data: fetchedUserData } = await supabase
+      const { data: user, error: userError } = await supabase.auth.getUser();
+      if (userError || !user.user) {
+        router.push("/");
+        return;
+      }
+
+      const { data: fetchedUserData, error: userFetchError } = await supabase
         .from("users")
         .select("*")
-        .eq("id", user.user!.id)
+        .eq("id", user.user.id)
         .single();
-      const { data: pathsData } = await supabase.from("paths").select("*");
+      if (userFetchError || !fetchedUserData) {
+        setUserData(null);
+        return;
+      }
+
+      const { data: pathsData, error: pathsError } = await supabase
+        .from("paths")
+        .select("*");
+      if (pathsError) {
+        setPaths([]);
+      } else {
+        setPaths(pathsData as Path[]);
+      }
 
       setUserData(fetchedUserData as UserData);
-      setPaths((pathsData as Path[]) || []);
     };
+
     fetchData();
   }, [router, supabase]);
 
   const calculateStreak = (): number => {
-    const progress = userData?.progress?.[userData?.current_path || ""] || [];
+    if (!userData || !userData.current_path) return 0;
+    const progress = userData.progress?.[userData.current_path] || [];
     return progress.length; // Simple count for MVP
   };
 
-  const handleLogout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/");
+  const calculateProgress = (): number => {
+    if (!userData || !userData.current_path) return 0;
+    const progress = userData.progress?.[userData.current_path] || [];
+    return (progress.length / 5) * 100; // Assuming 5 challenges per path
   };
 
-  if (!userData) return <p>Loading...</p>;
+  const handleLogout = async () => {
+    const response = await fetch("/api/auth/logout", { method: "POST" });
+    if (response.ok) {
+      router.push("/");
+    } else {
+      console.error("Logout failed");
+    }
+  };
+
+  if (!userData) return <p>Loading user data...</p>;
 
   return (
     <div style={{ padding: "20px" }}>
       <h1>AI Pulse Dashboard</h1>
       <p>Streak: {calculateStreak()} days</p>
-      <p>
-        Progress:{" "}
-        {((userData.progress?.[userData.current_path || ""]?.length || 0) / 5) *
-          100}
-        %
-      </p>
+      <p>Progress: {calculateProgress().toFixed(1)}%</p>
       <h2>Paths</h2>
       <ul>
         {paths.map((path) => (
