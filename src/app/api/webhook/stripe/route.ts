@@ -5,20 +5,12 @@ import { Database } from "@/types/supabase";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-03-31.basil", // Updated to your specified version
+  apiVersion: "2025-03-31.basil",
 });
 
 export async function POST(request: Request) {
   const sig = request.headers.get("stripe-signature");
   const body = await request.text();
-
-  // Debug logging
-  console.log("Webhook request details:", {
-    signature: sig,
-    secret: process.env.STRIPE_WEBHOOK_SECRET,
-    bodySnippet: body.substring(0, 100),
-    bodyLength: body.length,
-  });
 
   if (!sig) {
     console.error("Missing Stripe-Signature header");
@@ -46,24 +38,24 @@ export async function POST(request: Request) {
       (err as Error).message
     );
     return NextResponse.json(
-      { error: (err as Error).message },
+      { error: "Webhook signature invalid" },
       { status: 400 }
     );
   }
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
-    const userEmail = session.customer_email;
+    const userEmail = session.customer_email?.toLowerCase();
 
     if (!userEmail) {
       console.error("No customer email in session");
       return NextResponse.json({ error: "No email" }, { status: 400 });
     }
 
-    const cookieStore = await cookies(); // Fixed: await cookies()
+    const cookieStore = await cookies();
     const supabase = createServerClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!, // Use service key
       {
         cookies: {
           get(name: string) {
@@ -82,7 +74,7 @@ export async function POST(request: Request) {
     const { data: userData, error: userError } = await supabase
       .from("users")
       .select("id")
-      .eq("email", userEmail)
+      .ilike("email", userEmail)
       .single();
 
     if (userError || !userData) {
