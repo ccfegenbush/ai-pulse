@@ -5,16 +5,32 @@ import { Database } from "@/types/supabase";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-03-31.basil",
+  apiVersion: "2025-03-31.basil", // Updated to your specified version
 });
 
 export async function POST(request: Request) {
-  const body = await request.text();
   const sig = request.headers.get("stripe-signature");
+  const body = await request.text();
+
+  // Debug logging
+  console.log("Webhook request details:", {
+    signature: sig,
+    secret: process.env.STRIPE_WEBHOOK_SECRET,
+    bodySnippet: body.substring(0, 100),
+    bodyLength: body.length,
+  });
 
   if (!sig) {
     console.error("Missing Stripe-Signature header");
     return NextResponse.json({ error: "No signature" }, { status: 400 });
+  }
+
+  if (!process.env.STRIPE_WEBHOOK_SECRET) {
+    console.error("STRIPE_WEBHOOK_SECRET is not set");
+    return NextResponse.json(
+      { error: "Server misconfiguration" },
+      { status: 500 }
+    );
   }
 
   let event: Stripe.Event;
@@ -22,7 +38,7 @@ export async function POST(request: Request) {
     event = stripe.webhooks.constructEvent(
       body,
       sig,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (err) {
     console.error(
@@ -44,7 +60,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No email" }, { status: 400 });
     }
 
-    const cookieStore = await cookies();
+    const cookieStore = await cookies(); // Fixed: await cookies()
     const supabase = createServerClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
