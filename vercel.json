@@ -1,13 +1,8 @@
 {
   "rewrites": [
     {
-      "source": "/api/webhook/stripe",
-      "destination": "/api/webhook/stripe",
-      "bypassAuthentication": true
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/$1"
+      "source": "/webhook/stripe",
+      "destination": "/public/webhook/stripe"
     }
   ]
 }

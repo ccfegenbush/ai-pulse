@@ -5,7 +5,10 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // Bypass middleware for Stripe webhook
-  if (pathname.startsWith("/api/webhook/stripe")) {
+  if (
+    pathname.startsWith("/webhook/stripe") ||
+    pathname.startsWith("/public/webhook/stripe")
+  ) {
     console.log("Middleware bypassed for:", pathname);
     return NextResponse.next();
   }
@@ -46,5 +49,7 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    "/((?!api|_next/static|_next/image|favicon.ico|public/webhook/stripe).*)",
+  ],
 };
