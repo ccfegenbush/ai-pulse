@@ -5,6 +5,7 @@ import { createBrowserClient } from "@supabase/ssr";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Database } from "@/types/supabase";
+import { loadStripe } from "@stripe/stripe-js";
 
 export interface Path {
   id: string;
@@ -19,6 +20,9 @@ export interface UserData {
   current_path: string | null;
   progress: Record<string, number[]>;
 }
+
+const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+const stripePromise = stripeKey ? loadStripe(stripeKey) : null;
 
 export default function Dashboard() {
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -60,7 +64,11 @@ export default function Dashboard() {
       if (pathsError) {
         setPaths([]);
       } else {
-        setPaths(pathsData as Path[]);
+        const filteredPaths =
+          fetchedUserData.subscription === "free"
+            ? (pathsData as Path[]).filter((path) => path.id === "ml-basics")
+            : pathsData;
+        setPaths(filteredPaths as Path[]);
       }
 
       setUserData(fetchedUserData as UserData);
@@ -72,13 +80,13 @@ export default function Dashboard() {
   const calculateStreak = (): number => {
     if (!userData || !userData.current_path) return 0;
     const progress = userData.progress?.[userData.current_path] || [];
-    return progress.length; // Simple count for MVP
+    return progress.length;
   };
 
   const calculateProgress = (): number => {
     if (!userData || !userData.current_path) return 0;
     const progress = userData.progress?.[userData.current_path] || [];
-    return (progress.length / 5) * 100; // Assuming 5 challenges per path
+    return (progress.length / 5) * 100;
   };
 
   const handleLogout = async () => {
@@ -87,6 +95,36 @@ export default function Dashboard() {
       router.push("/");
     } else {
       console.error("Logout failed");
+    }
+  };
+
+  const handleSubscribe = async () => {
+    if (!stripePromise) {
+      console.error(
+        "Stripe.js not initialized - missing NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY"
+      );
+      return;
+    }
+
+    const stripe = await stripePromise;
+    if (!stripe) {
+      console.error("Stripe.js failed to load");
+      return;
+    }
+
+    const response = await fetch("/api/subscribe", { method: "POST" });
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(
+        `Failed to create checkout session: ${response.status} - ${errorText}`
+      );
+      return;
+    }
+
+    const { sessionId } = await response.json();
+    const { error } = await stripe.redirectToCheckout({ sessionId });
+    if (error) {
+      console.error("Checkout error:", error.message);
     }
   };
 
@@ -105,6 +143,9 @@ export default function Dashboard() {
           </li>
         ))}
       </ul>
+      {userData.subscription === "free" && (
+        <button onClick={handleSubscribe}>Subscribe ($8/month)</button>
+      )}
       <button onClick={handleLogout}>Logout</button>
     </div>
   );

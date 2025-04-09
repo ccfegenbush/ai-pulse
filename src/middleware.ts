@@ -2,6 +2,14 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  // Bypass middleware for Stripe webhook
+  if (pathname.startsWith("/api/webhook/stripe")) {
+    console.log("Middleware bypassed for:", pathname);
+    return NextResponse.next();
+  }
+
   let response = NextResponse.next({ request: req });
 
   const supabase = createServerClient(
@@ -26,7 +34,13 @@ export async function middleware(req: NextRequest) {
     }
   );
 
-  await supabase.auth.getSession();
+  const { data: sessionData, error: sessionError } =
+    await supabase.auth.getSession();
+  console.log("Middleware session check:", {
+    pathname,
+    session: !!sessionData.session,
+    error: sessionError?.message,
+  });
 
   return response;
 }
