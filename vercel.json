@@ -1,8 +1,15 @@
 {
-  "rewrites": [
+  "headers": [
     {
       "source": "/webhook/stripe",
-      "destination": "/public/webhook/stripe"
+      "headers": [{ "key": "Access-Control-Allow-Origin", "value": "*" }]
+    }
+  ],
+  "routes": [
+    {
+      "src": "/webhook/stripe",
+      "dest": "/api/webhook/stripe",
+      "continue": true
     }
   ]
 }
