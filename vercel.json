@@ -5,11 +5,10 @@
       "headers": [{ "key": "Access-Control-Allow-Origin", "value": "*" }]
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/webhook/stripe",
-      "dest": "/api/webhook/stripe",
-      "continue": true
+      "source": "/webhook/stripe",
+      "destination": "/api/webhook/stripe"
     }
   ]
 }
