@@ -9,45 +9,256 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      paths: {
+      achievements: {
         Row: {
-          challenges: Json
+          criteria: Json
+          description: string
           id: string
+          image_url: string | null
           name: string
         }
         Insert: {
-          challenges: Json
-          id: string
+          criteria: Json
+          description: string
+          id?: string
+          image_url?: string | null
           name: string
         }
         Update: {
-          challenges?: Json
+          criteria?: Json
+          description?: string
           id?: string
+          image_url?: string | null
           name?: string
         }
         Relationships: []
       }
-      users: {
+      paths: {
         Row: {
-          current_path: string | null
-          email: string
+          challenges: Json
+          description: string | null
+          difficulty: string | null
+          estimated_hours: number | null
           id: string
-          progress: Json | null
-          subscription: string | null
+          name: string
+          prerequisites: string[] | null
+          tags: string[] | null
         }
         Insert: {
-          current_path?: string | null
-          email: string
-          id?: string
-          progress?: Json | null
-          subscription?: string | null
+          challenges: Json
+          description?: string | null
+          difficulty?: string | null
+          estimated_hours?: number | null
+          id: string
+          name: string
+          prerequisites?: string[] | null
+          tags?: string[] | null
         }
         Update: {
-          current_path?: string | null
+          challenges?: Json
+          description?: string | null
+          difficulty?: string | null
+          estimated_hours?: number | null
+          id?: string
+          name?: string
+          prerequisites?: string[] | null
+          tags?: string[] | null
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_id: string | null
+          earned_at: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          achievement_id?: string | null
+          earned_at?: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          achievement_id?: string | null
+          earned_at?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_achievements_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_activity: {
+        Row: {
+          activity_data: Json | null
+          activity_type: string
+          created_at: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          activity_data?: Json | null
+          activity_type: string
+          created_at?: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          activity_data?: Json | null
+          activity_type?: string
+          created_at?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_activity_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_courses: {
+        Row: {
+          completed_at: string | null
+          completion_percentage: number | null
+          enrolled_at: string | null
+          id: number
+          last_activity_at: string | null
+          path_id: string
+          progress: number[] | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completion_percentage?: number | null
+          enrolled_at?: string | null
+          id?: number
+          last_activity_at?: string | null
+          path_id: string
+          progress?: number[] | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          completion_percentage?: number | null
+          enrolled_at?: string | null
+          id?: number
+          last_activity_at?: string | null
+          path_id?: string
+          progress?: number[] | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_courses_path_id_fkey"
+            columns: ["path_id"]
+            isOneToOne: false
+            referencedRelation: "paths"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_courses_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_payment_methods: {
+        Row: {
+          card_brand: string | null
+          created_at: string
+          expiry_month: number | null
+          expiry_year: number | null
+          id: string
+          is_default: boolean | null
+          last_four: string | null
+          stripe_payment_method_id: string
+          user_id: string | null
+        }
+        Insert: {
+          card_brand?: string | null
+          created_at?: string
+          expiry_month?: number | null
+          expiry_year?: number | null
+          id?: string
+          is_default?: boolean | null
+          last_four?: string | null
+          stripe_payment_method_id: string
+          user_id?: string | null
+        }
+        Update: {
+          card_brand?: string | null
+          created_at?: string
+          expiry_month?: number | null
+          expiry_year?: number | null
+          id?: string
+          is_default?: boolean | null
+          last_four?: string | null
+          stripe_payment_method_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_payment_methods_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          email: string
+          id: string
+          notification_email: boolean | null
+          notification_push: boolean | null
+          profile_photo_url: string | null
+          stripe_customer_id: string | null
+          subscription: string | null
+          theme_preference: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          email: string
+          id?: string
+          notification_email?: boolean | null
+          notification_push?: boolean | null
+          profile_photo_url?: string | null
+          stripe_customer_id?: string | null
+          subscription?: string | null
+          theme_preference?: string | null
+          updated_at?: string | null
+        }
+        Update: {
           email?: string
           id?: string
-          progress?: Json | null
+          notification_email?: boolean | null
+          notification_push?: boolean | null
+          profile_photo_url?: string | null
+          stripe_customer_id?: string | null
           subscription?: string | null
+          theme_preference?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }

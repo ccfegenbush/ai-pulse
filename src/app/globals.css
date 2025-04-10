@@ -1,26 +1,316 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Base colors */
+  --black: #0a0a0a;
+  --white: #ffffff;
+  --purple-primary: #7c3aed; /* Vibrant purple */
+  --purple-light: #a78bfa;
+  --purple-dark: #5b21b6;
+  --purple-bg-light: #f5f3ff; /* Light purple background */
+  --gray-50: #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0;
+  --gray-300: #cbd5e1;
+  --gray-400: #94a3b8;
+  --gray-500: #64748b;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1e293b;
+  --gray-900: #0f172a;
+
+  /* System colors */
+  --background: var(--white);
+  --foreground: var(--black);
+  --primary: var(--purple-primary);
+  --primary-light: var(--purple-light);
+  --primary-dark: var(--purple-dark);
+  --muted: var(--gray-200);
+  --muted-foreground: var(--gray-500);
+  --border: var(--gray-200);
+  
+  /* iOS UI properties */
+  --radius: 12px;
+  --header-height: 44px;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  
+  /* Responsive sizing */
+  --container-sm: 540px;
+  --container-md: 720px;
+  --container-lg: 960px;
+  --container-xl: 1140px;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-primary: var(--primary);
+  --color-primary-light: var(--primary-light);
+  --color-primary-dark: var(--primary-dark);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --font-sans: ui-rounded, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
+/* Adjusting dark mode to use a white background with darker text */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: var(--white);
+    --foreground: var(--gray-900);
+    --muted: var(--gray-200);
+    --muted-foreground: var(--gray-600);
+    --border: var(--gray-300);
   }
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  line-height: 1.5;
+}
+
+/* iOS-like components with responsive design */
+.ios-container {
+  width: 100%;
+  max-width: var(--container-sm);
+  margin: 0 auto;
+  padding: 16px;
+  transition: max-width 0.3s ease;
+}
+
+@media (min-width: 768px) {
+  .ios-container {
+    max-width: var(--container-md);
+    padding: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .ios-container {
+    max-width: var(--container-lg);
+    padding: 32px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .ios-container {
+    max-width: var(--container-xl);
+  }
+}
+
+/* Responsive grid for larger screens */
+.ios-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .ios-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .ios-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+}
+
+.ios-card {
+  background-color: var(--background);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ios-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+@media (min-width: 768px) {
+  .ios-card {
+    padding: 24px;
+  }
+}
+
+.ios-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  padding: 12px 24px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.ios-button-primary {
+  background-color: var(--primary);
+  color: white;
+}
+
+.ios-button-primary:hover {
+  background-color: var(--primary-dark);
+}
+
+.ios-button-secondary {
+  background-color: var(--muted);
+  color: var(--muted-foreground);
+}
+
+.ios-input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background-color: var(--background);
+  color: var(--foreground);
+  font-size: 16px;
+  transition: border 0.2s ease;
+}
+
+.ios-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+/* Responsive adaptive container for login/signup forms */
+.ios-auth-container {
+  max-width: var(--container-sm);
+  margin: 0 auto;
+  padding: 16px;
+  transition: all 0.3s ease;
+}
+
+@media (min-width: 768px) {
+  .ios-auth-container {
+    padding: 48px 24px;
+  }
+}
+
+/* iOS-like navigation */
+.ios-header {
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: rgba(var(--background), 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+
+@media (min-width: 768px) {
+  .ios-header {
+    padding: 0 24px;
+    height: 60px;
+  }
+}
+
+/* iOS-like animations */
+@keyframes ios-slide-up {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.ios-animate-in {
+  animation: ios-slide-up 0.3s ease forwards;
+}
+
+/* Utilities */
+.ios-glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(var(--border), 0.2);
+}
+
+/* Feature cards for larger screens */
+.ios-feature-card {
+  background-color: var(--background);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ios-feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Center container for very large screens */
+.ios-center-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+@media (min-width: 768px) {
+  .ios-center-container {
+    padding: 0 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .ios-center-container {
+    padding: 0 32px;
+  }
+}
+
+/* Scrollbar styles */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
 }
